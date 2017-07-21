@@ -3,6 +3,8 @@ package MusicService;
 import MusicBean.xm.XiamiDatas;
 import MusicBean.xm.XiamiIds;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import sun.nio.ch.Net;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,6 @@ public class XmMusic implements IMusic {
         if (xiamiDatas == null) {
             return null;//没有找到符合的歌曲
         }
-        int totalsize = xiamiDatas.getData().getTotal();
         return GetListByJson(xiamiDatas.getData().getSongs());
 
     }
@@ -33,15 +34,12 @@ public class XmMusic implements IMusic {
         if (len <= 0) {
             return null;
         }
-        int i = 0;
-        while (i < len) {
-            XiamiDatas.DataBean.SongsBean songsBean = songs.get(i);
+        for(XiamiDatas.DataBean.SongsBean songsBean:songs){
             String SongId = String.valueOf(songsBean.getSong_id());
             SongResult songResult = SearchSong(SongId);
             if (songResult != null) {
                 list.add(songResult);
             }
-            i++;
         }
         return list;
     }
@@ -60,7 +58,6 @@ public class XmMusic implements IMusic {
             }
             XiamiIds.DataBean.TrackListBean trackListBean = trackList.get(0);
             SongResult song = new SongResult();
-
             String songId = trackListBean.getSong_id();
             String songName = trackListBean.getSongName();
             String songLink = "http://www.xiami.com/song/" + songId;
@@ -82,29 +79,20 @@ public class XmMusic implements IMusic {
             song.setLength(length);
             song.setLrcUrl(lyric);
             song.setPicUrl(picUrl);
-            List<XiamiIds.DataBean.TrackListBean.AllAudiosBean> allAudios = trackListBean.getAllAudios();
-            boolean hash320Kbite = false;
-            for (XiamiIds.DataBean.TrackListBean.AllAudiosBean allAudiosBean : allAudios) {
-                if (allAudiosBean.getFormat().equals("mp3")) {
-                    if (allAudiosBean.getAudioQualityEnum().equals("HIGH")) {
-                        hash320Kbite = true;
-                        song.setSqUrl(allAudiosBean.getFilePath());
-                        song.setHqUrl(allAudiosBean.getFilePath());
-                    }
-                    if (allAudiosBean.getAudioQualityEnum().equals("LOW")) {
-                        song.setLqUrl(allAudiosBean.getFilePath());
-                    }
-                }
-            }
-            if (hash320Kbite) {
-                song.setBitRate("320K");
-            } else {
+            String location = trackListBean.getLocation();
+            if(!location.isEmpty()){
+                song.setLqUrl(Util.getXiaMp3Url(location));
                 song.setBitRate("128K");
             }
+            String hqUrl = songUrl(songId);
+            if(!hqUrl.isEmpty()){
+                song.setHqUrl(Util.getXiaMp3Url(hqUrl));
+                song.setSqUrl(Util.getXiaMp3Url(hqUrl));
+                song.setBitRate("320K");
+            }
             song.setType("xm");
-
             return song;
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
 
         }
         return null;
@@ -118,29 +106,13 @@ public class XmMusic implements IMusic {
         return song;
     }
 
-    //虾米网页版mv为m3u8
-//    private static String GetMvUrl(String id, String quality, String format) {
-//        if (format == "mp4" || format == "flv") {
-//            String mvId;
-//            String html;
-//            if (Util.isNumber(id)) {
-//                String url = "http://www.xiami.com/song/" + id;
-//                html = NetUtil.GetHtmlContent(url);
-//                if (html.isEmpty()) {
-//                    return "";
-//                }
-//                mvId = Util.RegexString("(?<=href=\" \"/mv/)\\w+(?=\" \")", html);
-//            } else {
-//                mvId = id;
-//            }
-//            if (mvId.isEmpty()) {
-//                return null;
-//            }
-//            html = NetUtil.GetHtmlContent("http://m.xiami.com/mv/" + mvId);
-//            return html.isEmpty() ? "" : Util.RegexString("(?<=<video src=\"\")[^\"\"]+(?=\"\"\\s*poster=)", html);
-//        }
-//        return "";
-//    }
+    private static String songUrl(String songId){
+        String url = String.format("http://www.xiami.com/song/gethqsong/sid/%s",songId);
+        String s = NetUtil.GetHtmlWithRefer(url, "http://www.xiami.com/");
+        JSONObject ret = JSON.parseObject(s);
+        return ret.getString("location");
+    }
+
 
     @Override
     public List<SongResult> SongSearch(String key, int page, int size) {

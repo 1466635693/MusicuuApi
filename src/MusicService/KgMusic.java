@@ -201,7 +201,7 @@ public class KgMusic implements IMusic {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
         return "";

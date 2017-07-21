@@ -219,7 +219,7 @@ public class WyMusic implements IMusic {
     }
 
     //获取下架音乐地址
-    public static String GetLostPlayUrl(String id, String quality) {
+    private static String GetLostPlayUrl(String id, String quality) {
         String albumId = GetLostAlbumId(id);
         try {
             String s = NetUtil.GetHtmlContent("http://music.163.com/api/album/" + albumId, true);
@@ -264,7 +264,7 @@ public class WyMusic implements IMusic {
         return "http://m2.music.126.net/" + encryptPath + "/" + dfsId + ".mp3";
     }
 
-    public static String EncryptId(String id) {
+    private static String EncryptId(String id) {
         byte[] byte1 = "3go8&$8*3*3h0k(2)2".getBytes();
         byte[] byte2 = id.getBytes();
         int byte1Length = byte1.length;
