@@ -12,7 +12,7 @@ import java.util.List;
 public class SearchSong {
     public static void main(String[] args) throws UnsupportedEncodingException {
 
-        List<SongResult> wy = MusicService.GetMusic("wy").SongSearch("i", 1, 10);
+        List<SongResult> wy = MusicService.GetMusic("qq").SongSearch("solo dance", 1, 15);
         SearchResult searchResult = new SearchResult();
         if (wy == null) {
             searchResult.setStatus(404);

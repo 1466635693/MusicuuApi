@@ -103,7 +103,9 @@ public class TxMusic implements IMusic {
 //            }
             //ape为A000
             String albummid = songsBean.getAlbummid();
-            songResult.setPicUrl("http://i.gtimg.cn/music/photo/mid_album_500/" + albummid.substring(albummid.length() - 2, albummid.length() - 1) + "/" + albummid.substring(albummid.length() - 1) + "/" + albummid + ".jpg");
+            if (!albummid.isEmpty() && albummid.length() > 2) {
+                songResult.setPicUrl("http://i.gtimg.cn/music/photo/mid_album_500/" + albummid.substring(albummid.length() - 2, albummid.length() - 1) + "/" + albummid.substring(albummid.length() - 1) + "/" + albummid + ".jpg");
+            }
             songResult.setLength(Util.secTotime(songsBean.getInterval()));
 
             songResult.setType("qq");

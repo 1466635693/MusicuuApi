@@ -23,7 +23,6 @@ public class Test {
         String text1 = "{\"s\":\"" + key + "\",\"type\":1004,\"offset\":" + (page - 1) * size + ",\"limit\":" + size + ",\"total\":true}";
         String t = NetUtil.GetEncHtml(HOST, text1, true);
         System.out.println(t);
-
         //由上可以发现变化的仅仅是type值，
         // 10===通过歌手搜索专辑，
         // 1004===mv，
